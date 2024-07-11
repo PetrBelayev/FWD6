@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write .",
+    "check": "tsc --noEmit",
+    "build": "next build && next export",
+    "start": "next start"
+  }
+}
