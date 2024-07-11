@@ -1,45 +1,31 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import Comic from '../components/Comic';
-import { GetServerSideProps } from 'next';
+import { format } from 'date-fns';
 
-interface HomeProps {
-  comicData: {
-    safe_title: string;
-    img: string;
-    alt: string;
-    year: string;
-    month: string;
-    day: string;
-  };
-}
-
-const Home: React.FC<HomeProps> = ({ comicData }) => {
-  return (
-    <Layout>
-      <Comic
-        title={comicData.safe_title}
-        imageUrl={comicData.img}
-        date={`${comicData.year}-${comicData.month}-${comicData.day}`}
-      />
-    </Layout>
-  );
-};
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const email = 'p.belayev@innopolis.university';
-  const urlParams = new URLSearchParams({ email });
-  const comicIdUrl = `https://fwd.innopolis.university/api/hw2?${urlParams.toString()}`;
-
-  const idResponse = await fetch(comicIdUrl);
-  const comicId = await idResponse.json();
-  const comicUrl = `https://fwd.innopolis.university/api/comic?id=${comicId}`;
-  const comicResponse = await fetch(comicUrl);
+export async function getServerSideProps() {
+  const response = await fetch('https://fwd.innopolis.university/api/hw2?email=p.belayev@innopolis.university');
+  const comicId = await response.json();
+  const comicResponse = await fetch(`https://fwd.innopolis.university/api/comic?id=${comicId}`);
   const comicData = await comicResponse.json();
 
-  return {
-    props: { comicData }
+  const comic = {
+    title: comicData.safe_title,
+    imageUrl: comicData.img,
+    date: `${comicData.year}-${comicData.month}-${comicData.day}`,
   };
+
+  return { props: { comic } };
+}
+
+const Home: React.FC<{ comic: Comic }> = ({ comic }) => {
+  const currentDate = format(new Date(comic.date), 'MMMM dd, yyyy');
+
+  return (
+    <Layout>
+      <Comic title={comic.title} imageUrl={comic.imageUrl} date={currentDate} />
+    </Layout>
+  );
 };
 
 export default Home;
